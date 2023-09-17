@@ -8,10 +8,10 @@ import java.util.*
 
 fun main(args: Array<String>) {
     val f = File.listRoots()[0]
-    println(llistaDirectori(f))
+    println(listDirectory(f))
 }
 
-fun llistaDirectori(f: File) {
+fun listDirectory(f: File) {
     val s = "Llista de fitxers i directoris del directori " + f.path
     var n = 1
     println(s)
@@ -22,8 +22,8 @@ fun llistaDirectori(f: File) {
         println("0.- ${f.parent}")
     }
     for (e in f.listFiles().sorted()) {
-        val permisos = obtenerPermisos(e)
-        val modificacion = obtenerFechaModificacio(e)
+        val permisos = directoryPermis(e)
+        val modificacion = modifDate(e)
         if (e.isFile()) {
             println(
                 "${n}.- " + permisos + "\t " + e.length() +
@@ -38,59 +38,63 @@ fun llistaDirectori(f: File) {
         }
         n++
     }
+    introduceNumber(f)
+}
+
+private fun introduceNumber(f: File) {
     println(" ")
     println("Introdueix un numero (-1 per acabar): ")
-    val entrada = BufferedReader(InputStreamReader(System.`in`)).readLine()
-    val num = entrada.toIntOrNull()
+    val input = BufferedReader(InputStreamReader(System.`in`)).readLine()
+    val num = input.toIntOrNull()
     if (num != null) {
-        bucleNumeros(num, f)
+        loopNumbers(num, f)
     } else {
         println("Entrada no valida. Introduix un numero válid.")
-        println(" ")
-        llistaDirectori(f)
+        println("")
+        listDirectory(f)
     }
 }
 
-fun bucleNumeros(numero: Int, f: File) {
+fun loopNumbers(number: Int, f: File) {
     var currentFile: File
-    if (numero == -1) {
-        System.exit(0)
-    } else if (numero > f.listFiles().size || numero < -1) {
-        println("Numero incorrecte")
-    } else if (numero == 0) {
-        val parentFile = f.parentFile
-        if (parentFile != null && parentFile.exists()) {
-            currentFile = f.parentFile
-            println(llistaDirectori(currentFile))
-        } else {
-            println(llistaDirectori(f))
-        }
-    } else {
-        currentFile = f.listFiles().sorted()[numero - 1]
-        if (currentFile.isDirectory) {
-            if (currentFile.canRead()) {
-                println(llistaDirectori(currentFile))
+        if (number == -1) {
+            System.exit(0)
+        } else if (number > f.listFiles().size || number < -1) {
+            println("Numero incorrecte")
+        } else if (number == 0) {
+            val parentFile = f.parentFile
+            if (parentFile != null && parentFile.exists()) {
+                currentFile = f.parentFile
+                println(listDirectory(currentFile))
             } else {
-                println("No tens permisos")
-                println(llistaDirectori(f))
+                println(listDirectory(f))
             }
         } else {
-            println(llistaDirectori(f))
+            currentFile = f.listFiles().sorted()[number - 1]
+            if (currentFile.canRead() && currentFile.isDirectory) {
+                println(listDirectory(currentFile))
+            } else {
+                if (!currentFile.canRead()) {
+                    println("No tens permisos")
+                    println(listDirectory(f))
+                } else {
+                    println(listDirectory(f))
+                }
+            }
         }
-    }
 }
 
-fun obtenerPermisos(f: File): String {
-    val permisos = StringBuilder()
-    permisos.append(if (f.isDirectory) "d" else "-")
-    permisos.append(if (f.canRead()) "r" else "-")
-    permisos.append(if (f.canWrite()) "w" else "-")
-    permisos.append(if (f.canExecute()) "x" else "-")
-    return permisos.toString()
+fun directoryPermis(f: File): String {
+    val permis = StringBuilder()
+    permis.append(if (f.isDirectory) "d" else "-")
+    permis.append(if (f.canRead()) "r" else "-")
+    permis.append(if (f.canWrite()) "w" else "-")
+    permis.append(if (f.canExecute()) "x" else "-")
+    return permis.toString()
 }
 
-fun obtenerFechaModificacio(f: File): String {
+fun modifDate(f: File): String {
     val dateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm:ss")
-    val fechaModificacion = Date(f.lastModified())
-    return dateFormat.format(fechaModificacion)
+    val modifDate = Date(f.lastModified())
+    return dateFormat.format(modifDate)
 }
